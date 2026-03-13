@@ -7,58 +7,49 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
-def analyze_requirements(prompt):
+def analyze_project(prompt, budget, timeline):
 
     system_prompt = f"""
-You are an AI project manager.
+You are an AI project planner.
 
-Convert the following project description into structured milestones.
+A user provides:
+- Project description
+- Total budget
+- Timeline
 
-Return JSON format:
+Your job:
+1. Identify the project DOMAIN.
+2. Break the project into logical milestones.
+3. Divide the timeline across milestones.
+4. Divide the budget across milestones.
+
+IMPORTANT:
+Return ONLY valid JSON.
+Do NOT include markdown or explanation.
+
+Return JSON exactly in this format:
+
 {{
- "milestones":[
+ "domain": "",
+ "total_budget": {budget},
+ "timeline": "{timeline}",
+ "milestones": [
    {{
-     "title":"",
-     "description":"",
-     "estimated_days":0
+     "title": "",
+     "description": "",
+     "timeline": "",
+     "budget_allocation": 0
    }}
  ]
 }}
 
-Project:
+Project Description:
 {prompt}
 """
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=system_prompt
-    )
-
-    return response.text
-
-
-def qa_verification(project_output):
-
-    prompt = f"""
-You are a software quality reviewer.
-
-Evaluate the following work.
-
-Return JSON:
-
-{{
- "score":0-100,
- "issues":[],
- "feedback":""
-}}
-
-Work:
-{project_output}
-"""
-
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
     )
 
     return response.text

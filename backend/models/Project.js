@@ -1,31 +1,43 @@
 const mongoose = require("mongoose");
 
+const milestoneSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  timeline: String,
+  budget_allocation: Number,
+
+  status: {
+    type: String,
+    default: "pending"
+  }
+});
+
 const projectSchema = new mongoose.Schema(
-  {
-    title: String,
+{
+  description: String,
 
-    description: String,
+  domain: String,
 
-    skills: [String],
+  total_budget: Number,
 
-    budget: Number,
+  timeline: String,
 
-    timeline: Number,
+  employerId: String,
 
-    employerId: String,
-
-    freelancerId: {
-      type: String,
-      default: null,
-    },
-
-    status: {
-      type: String,
-      enum: ["open", "in-progress", "completed"],
-      default: "open",
-    },
+  freelancerId: {
+    type: String,
+    default: null
   },
-  { timestamps: true }
+
+  status: {
+    type: String,
+    default: "draft"
+  },
+
+  milestones: [milestoneSchema]
+
+},
+{timestamps:true}
 );
 
 module.exports = mongoose.model("Project", projectSchema);

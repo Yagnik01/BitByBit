@@ -1,13 +1,19 @@
 const axios = require("axios");
 
-exports.analyzeProject = async (description) => {
+async function analyzeProject(description, budget, timeline) {
 
   const response = await axios.post(
-    "http://localhost:8000/analyze-requirements",
+    "http://localhost:8000/analyze",
     {
-      prompt: description,
+      description,
+      budget,
+      timeline
     }
   );
 
   return response.data;
+}
+
+module.exports = {
+  analyzeProject
 };

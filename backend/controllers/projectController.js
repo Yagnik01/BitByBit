@@ -6,38 +6,66 @@ const { analyzeProject } = require("../services/aiService");
 
 exports.analyzeProjectWithAI = async (req, res) => {
 
-  try {
 
-    const { description } = req.body;
+  try{
 
-    const aiData = await analyzeProject(description);
-    // console.log("AI response:", aiData);
+    const {description,budget,timeline} = req.body;
+
+    const aiData = await analyzeProject(
+      description,
+      budget,
+      timeline
+    );
+
     res.json(aiData);
 
-  } catch (error) {
+  }catch(error){
 
     console.log(error);
-    res.status(500).json({ error: "AI analysis failed" });
+
+    res.status(500).json({
+      message:"AI generation failed"
+    });
 
   }
-
 };
 
 
 
 /* CREATE PROJECT */
 
-exports.createProject = async (req, res) => {
+exports.createProject = async (req,res)=>{
 
-  try {
+  try{
 
-    const project = new Project(req.body);
+    const {
+      description,
+      domain,
+      total_budget,
+      timeline,
+      milestones
+    } = req.body;
 
-    const savedProject = await project.save();
+    const project = new Project({
 
-    res.json(savedProject);
+      description,
+      domain,
+      total_budget,
+      timeline,
 
-  } catch (error) {
+      milestones,
+
+      employerId:req.user.id,
+
+      status:"open"
+
+    });
+
+    await project.save();
+
+    res.json(project);
+
+  }catch(error){
 
     res.status(500).json(error);
 

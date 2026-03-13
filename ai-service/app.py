@@ -1,38 +1,26 @@
-from flask import Flask, request, jsonify
-from ai_engine import analyze_requirements, qa_verification
-from dotenv import load_dotenv
-
-load_dotenv()
+import json
+import re
+from flask import Flask,request,jsonify
+from ai_engine import analyze_project
 
 app = Flask(__name__)
 
-
-@app.route("/")
-def home():
-    return {"message": "AI Service Running"}
-
-
-@app.route("/analyze-requirements", methods=["POST"])
+@app.route("/analyze",methods=["POST"])
 def analyze():
 
     data = request.json
-    prompt = data.get("prompt")
 
-    result = analyze_requirements(prompt)
+    description = data.get("description")
+    budget = data.get("budget")
+    timeline = data.get("timeline")
 
-    return jsonify({"roadmap": result})
+    result = analyze_project(description,budget,timeline)
 
+    cleaned = re.sub(r"```json|```","",result).strip()
 
-@app.route("/qa-verification", methods=["POST"])
-def qa():
+    parsed = json.loads(cleaned)
 
-    data = request.json
-    output = data.get("output")
-
-    result = qa_verification(output)
-
-    return jsonify({"analysis": result})
-
+    return jsonify(parsed)
 
 if __name__ == "__main__":
     app.run(port=8000, debug=True)
