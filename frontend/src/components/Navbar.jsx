@@ -1,7 +1,78 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = ({ onLogout }) => {
+  const [socket, setSocket] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    // Initialize socket connection
+    const newSocket = io('http://localhost:5000', {
+      withCredentials: true,
+      transports: ['websocket', 'polling']
+    });
+    
+    setSocket(newSocket);
+
+    // Check if user is authenticated and get user info
+    const isAuthenticated = localStorage.getItem('authenticated') === 'true';
+    const userId = localStorage.getItem('userId') || 'Yug0407'; // Fallback to username if no userId
+    
+    if (isAuthenticated && userId) {
+      // Join user to their personal room for targeted notifications
+      newSocket.emit('join_user_room', userId);
+      
+      // Load initial notifications
+      newSocket.emit('get_notifications', userId);
+    }
+
+    // Listen for new project applications
+    newSocket.on('freelancer_applied', (data) => {
+      setNotifications(prev => [data, ...prev]);
+    });
+
+    newSocket.on('notifications_list', (data) => {
+      setNotifications(data);
+    });
+
+    return () => {
+      newSocket.close();
+    };
+  }, []);
+
+  const handleConfirmFreelancer = (notification) => {
+    if (socket) {
+      socket.emit('confirm_freelancer', {
+        projectId: notification.projectId,
+        freelancerId: notification.freelancerId
+      });
+      
+      // Remove notification from list
+      setNotifications(prev => 
+        prev.filter(n => n.projectId !== notification.projectId || n.freelancerId !== notification.freelancerId)
+      );
+      
+      alert(`Confirmed ${notification.freelancerName} for project: ${notification.projectTitle}`);
+    }
+  };
+
+  const handleRejectFreelancer = (notification) => {
+    if (socket) {
+      socket.emit('reject_freelancer', {
+        projectId: notification.projectId,
+        freelancerId: notification.freelancerId
+      });
+      
+      // Remove notification from list
+      setNotifications(prev => 
+        prev.filter(n => n.projectId !== notification.projectId || n.freelancerId !== notification.freelancerId)
+      );
+      
+      alert(`Rejected ${notification.freelancerName} for project: ${notification.projectTitle}`);
+    }
+  };
   return (
     <>
       <header className="navbar">
@@ -33,10 +104,11 @@ const Navbar = ({ onLogout }) => {
             <Link to="/post-project" className="btn btn-primary" style={{ textDecoration: 'none' }}>
               Post a Project
             </Link>
-            <div className="icon-btn" title="Notifications">
-              🔔
-              <span className="badge">2</span>
-            </div>
+            <NotificationDropdown 
+              notifications={notifications}
+              onConfirmFreelancer={handleConfirmFreelancer}
+              onRejectFreelancer={handleRejectFreelancer}
+            />
             <div className="icon-btn" title="Messages">
               💬
               <span className="badge">1</span>

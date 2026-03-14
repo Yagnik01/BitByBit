@@ -7,6 +7,8 @@
   import Freelancers from './pages/freelancer.jsx';
   import MyProjects from './pages/MyProjects.jsx';
   import Profile from './pages/Profile.jsx';
+  import ProjectDetails from "./pages/ProjectDetails";
+  import TestApplication from './pages/TestApplication';
   import './App.css';
   const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -36,7 +38,9 @@
           <Route path="/post-project" element={<PostProjectPage />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/freelancers" element={<Freelancers />} />
+          <Route path="/test-application" element={<TestApplication />} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/project/:id" element={<ProjectDetails />} />
           <Route path="/MyProjects" element={isAuthenticated ? <MyProjects /> : <Navigate to="/" replace />} />
           <Route path="/Profile" element={isAuthenticated ? <Profile /> : <Navigate to="/Profile" replace />} />
         </Routes>
