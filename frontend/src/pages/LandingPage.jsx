@@ -67,9 +67,7 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="header-left">
           <a href="/" className="landing-brand">
-            <svg className="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+            <img src="nexlance-logo.svg" alt="NexLance" />
             <span className="brand-text">freelancer</span>
           </a>
           <nav className="nav-menu">
@@ -103,7 +101,7 @@ const LandingPage = () => {
           </div>
         </div>
         <div className="pink-arrow" />
-        <p className="hero-caption">This radiation shield design for NASA cost $500 USD and took 15 days</p>
+        <p className="hero-caption">This radiation shield design for NASA cost Rs.500 and took 15 days</p>
       </section>
 
       {isModalOpen && (

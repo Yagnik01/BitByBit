@@ -1,159 +1,94 @@
-const Project = require('../models/Project');
-const User = require('../models/User');
-
-// Store notifications in memory (in production, use Redis or database)
-const notifications = new Map();
+/**
+ * Socket.IO handler
+ * Events: notifications, chat, project applications, approval push
+ */
+const Notification = require("../models/Notification");
+const Message      = require("../models/Message");
+const Conversation = require("../models/Conversation");
 
 const socketHandlers = (io) => {
+  const onlineUsers = new Map(); // userId → socketId
+
   io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
+    console.log("Socket connected:", socket.id);
 
-    // Join user to their personal room
-    socket.on('join_user_room', (userId) => {
+    // ── 1. User joins their personal notification room ───────────────────
+    socket.on("join_user_room", (userId) => {
+      if (!userId) return;
       socket.join(`user_${userId}`);
-      console.log(`User ${userId} joined their room`);
+      onlineUsers.set(String(userId), socket.id);
+      console.log(`User ${userId} joined room`);
+
+      // Send unread count immediately on connect
+      Notification.countDocuments({ recipientId: userId, read: false })
+        .then(count => socket.emit("unread_count", { count }))
+        .catch(() => {});
     });
 
-    // Handle freelancer applying to a project
-    socket.on('apply_to_project', async (data) => {
+    // ── 2. Chat: join / leave conversation room ──────────────────────────
+    socket.on("join_conversation", (convId) => {
+      socket.join(`conv_${convId}`);
+    });
+    socket.on("leave_conversation", (convId) => {
+      socket.leave(`conv_${convId}`);
+    });
+
+    // ── 3. Real-time chat message (supplement to REST) ───────────────────
+    socket.on("send_message", async (data) => {
       try {
-        const { projectId, freelancerId, freelancerName, projectTitle } = data;
-        
-        // Get project details
-        const project = await Project.findById(projectId);
-        if (!project) {
-          socket.emit('error', { message: 'Project not found' });
-          return;
-        }
+        const { conversationId, senderId, senderName, content } = data;
+        if (!content?.trim() || !conversationId || !senderId) return;
 
-        // Create notification
-        const notification = {
-          id: Date.now(),
-          projectId,
-          projectTitle,
-          freelancerId,
-          freelancerName,
-          freelancerAvatar: null, // You can fetch this from user model
-          timestamp: new Date(),
-          type: 'freelancer_application'
-        };
+        const conv = await Conversation.findById(conversationId);
+        if (!conv) return;
 
-        // Store notification for the project owner
-        const projectOwnerId = project.postedBy.toString();
-        if (!notifications.has(projectOwnerId)) {
-          notifications.set(projectOwnerId, []);
-        }
-        notifications.get(projectOwnerId).push(notification);
+        const message = await Message.create({ conversationId, senderId, senderName, content: content.trim() });
 
-        // Send notification to project owner
-        io.to(`user_${projectOwnerId}`).emit('freelancer_applied', notification);
-
-        // Confirm to freelancer
-        socket.emit('application_sent', { 
-          success: true, 
-          message: 'Application sent successfully' 
+        conv.lastMessage   = content.trim().slice(0, 100);
+        conv.lastMessageAt = new Date();
+        conv.participants.forEach(pid => {
+          if (pid.toString() !== String(senderId)) {
+            conv.unreadCounts.set(pid.toString(), (conv.unreadCounts.get(pid.toString()) || 0) + 1);
+          }
         });
+        await conv.save();
 
-      } catch (error) {
-        console.error('Error applying to project:', error);
-        socket.emit('error', { message: 'Failed to apply to project' });
+        io.to(`conv_${conversationId}`).emit("new_message", message);
+        conv.participants.forEach(pid => {
+          if (pid.toString() !== String(senderId))
+            io.to(`user_${pid}`).emit("new_message_notification", { conversationId, senderName, preview: content.trim().slice(0, 60) });
+        });
+      } catch (err) {
+        console.error("send_message socket error:", err);
       }
     });
 
-    // Handle getting notifications for a user
-    socket.on('get_notifications', (userId) => {
-      const userNotifications = notifications.get(userId) || [];
-      socket.emit('notifications_list', userNotifications);
+    // ── 4. Typing indicators ─────────────────────────────────────────────
+    socket.on("typing_start", ({ conversationId, userId, userName }) => {
+      socket.to(`conv_${conversationId}`).emit("user_typing", { userId, userName });
+    });
+    socket.on("typing_stop", ({ conversationId, userId }) => {
+      socket.to(`conv_${conversationId}`).emit("user_stopped_typing", { userId });
     });
 
-    // Handle confirming a freelancer
-    socket.on('confirm_freelancer', async (data) => {
+    // ── 5. Mark notification read ────────────────────────────────────────
+    socket.on("mark_notification_read", async ({ notificationId, userId }) => {
       try {
-        const { projectId, freelancerId } = data;
-        
-        // Update project status
-        const project = await Project.findById(projectId);
-        if (!project) {
-          socket.emit('error', { message: 'Project not found' });
-          return;
-        }
-
-        // Update project with accepted freelancer
-        project.acceptedFreelancer = freelancerId;
-        project.status = 'assigned';
-        await project.save();
-
-        // Remove the notification
-        const projectOwnerId = project.postedBy.toString();
-        const userNotifications = notifications.get(projectOwnerId) || [];
-        const updatedNotifications = userNotifications.filter(
-          n => !(n.projectId === projectId && n.freelancerId === freelancerId)
-        );
-        notifications.set(projectOwnerId, updatedNotifications);
-
-        // Notify the freelancer
-        const freelancer = await User.findById(freelancerId);
-        if (freelancer) {
-          io.to(`user_${freelancerId}`).emit('project_accepted', {
-            projectId,
-            projectTitle: project.title,
-            message: `Your application for "${project.title}" has been accepted!`
-          });
-        }
-
-        // Confirm to project owner
-        socket.emit('freelancer_confirmed', { 
-          success: true, 
-          message: 'Freelancer confirmed successfully' 
-        });
-
-      } catch (error) {
-        console.error('Error confirming freelancer:', error);
-        socket.emit('error', { message: 'Failed to confirm freelancer' });
-      }
+        await Notification.findOneAndUpdate({ _id: notificationId, recipientId: userId }, { read: true });
+        const count = await Notification.countDocuments({ recipientId: userId, read: false });
+        socket.emit("unread_count", { count });
+      } catch {}
     });
 
-    // Handle rejecting a freelancer
-    socket.on('reject_freelancer', async (data) => {
-      try {
-        const { projectId, freelancerId } = data;
-        
-        // Get project details
-        const project = await Project.findById(projectId);
-        if (!project) {
-          socket.emit('error', { message: 'Project not found' });
-          return;
-        }
-
-        // Remove the notification
-        const projectOwnerId = project.postedBy.toString();
-        const userNotifications = notifications.get(projectOwnerId) || [];
-        const updatedNotifications = userNotifications.filter(
-          n => !(n.projectId === projectId && n.freelancerId === freelancerId)
-        );
-        notifications.set(projectOwnerId, updatedNotifications);
-
-        // Notify the freelancer
-        io.to(`user_${freelancerId}`).emit('project_rejected', {
-          projectId,
-          projectTitle: project.title,
-          message: `Your application for "${project.title}" was not selected`
-        });
-
-        // Confirm to project owner
-        socket.emit('freelancer_rejected', { 
-          success: true, 
-          message: 'Freelancer rejected successfully' 
-        });
-
-      } catch (error) {
-        console.error('Error rejecting freelancer:', error);
-        socket.emit('error', { message: 'Failed to reject freelancer' });
-      }
+    // ── 6. Test helpers ──────────────────────────────────────────────────
+    socket.on("test_message", (data) => {
+      socket.emit("test_response", { message: "Received!", original: data, timestamp: new Date() });
     });
 
+    // ── 7. Disconnect ────────────────────────────────────────────────────
     socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
+      onlineUsers.forEach((sid, uid) => { if (sid === socket.id) onlineUsers.delete(uid); });
+      console.log("Socket disconnected:", socket.id);
     });
   });
 };

@@ -1,23 +1,30 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
 const protect = require("../middleware/authMiddleware");
-
 const {
   analyzeProjectWithAI,
   createProject,
   getAllProjects,
-  acquireProject,
+  getProjectById,
+  updateProject,
+  applyToProject,
+  acceptApplication,
   getFreelancerProjects,
   getEmployerProjects,
-} = require("../controllers/projectController.js");
+  acquireProject,
+} = require("../controllers/projectController");
 
-router.get("/test", (req, res) => res.json({ message: "Project routes working" }));
+router.get("/test", (req, res) => res.json({ ok: true }));
 
-router.post("/analyze", analyzeProjectWithAI);                          // POST /api/projects/analyze
-router.post("/create", protect, createProject);                         // POST /api/projects/create
-router.get("/", getAllProjects);                                         // GET  /api/projects/
-router.post("/acquire/:id", protect, acquireProject);                   // POST /api/projects/acquire/:id
-router.get("/my-projects/:userId", protect, getFreelancerProjects);     // GET  /api/projects/my-projects/:userId
-router.get("/employer-projects/:userId", protect, getEmployerProjects); // GET  /api/projects/employer-projects/:userId
+router.post  ("/analyze",                           analyzeProjectWithAI);        // public
+router.post  ("/create",               protect,     createProject);
+router.get   ("/",                                  getAllProjects);               // public
+router.get   ("/:id",                               getProjectById);              // public
+router.put   ("/:id",                  protect,     updateProject);
+router.post  ("/:id/apply",            protect,     applyToProject);
+router.post  ("/:id/accept/:applicationId", protect, acceptApplication);
+router.get   ("/my-projects/:userId",  protect,     getFreelancerProjects);
+router.get   ("/employer-projects/:userId", protect, getEmployerProjects);
+router.post  ("/acquire/:id",          protect,     acquireProject);              // legacy
 
 module.exports = router;
