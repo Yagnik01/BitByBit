@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <defs>
+    <linearGradient id="nexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#0ea5e9"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon: Stylized N with connection nodes -->
+  <g transform="translate(5, 5)">
+    <!-- Main N shape -->
+    <path d="M4 40V10h6l14 22V10h6v30h-6L10 18v22H4z" fill="url(#nexGradient)"/>
+    <!-- Connection dots -->
+    <circle cx="7" cy="8" r="3" fill="#0ea5e9"/>
+    <circle cx="27" cy="8" r="3" fill="#2563eb"/>
+    <circle cx="17" cy="25" r="2.5" fill="#0ea5e9" opacity="0.7"/>
+    <!-- Connection line -->
+    <line x1="10" y1="8" x2="24" y2="8" stroke="url(#nexGradient)" stroke-width="1.5" stroke-dasharray="2,2"/>
+  </g>
+  
+  <!-- Text: Nexlance -->
+  <text x="50" y="35" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="700">
+    <tspan fill="url(#nexGradient)">Nex</tspan><tspan fill="#1e293b">lance</tspan>
+  </text>
+</svg>

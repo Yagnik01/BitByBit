@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const MyProjects = () => {
+const MyProjects = ({ onProjectClick }) => {
   const [viewAs, setViewAs] = useState("client");
   const [activeTab, setActiveTab] = useState("open");
   const [searchQuery, setSearchQuery] = useState("");
@@ -11,6 +11,7 @@ const MyProjects = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [apiProjects, setApiProjects] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // Fetch real projects when viewAs changes
   useEffect(() => {
@@ -42,6 +43,7 @@ const MyProjects = () => {
               deadline: p.timeline || '-',
               completedDate: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('en-IN') : '-',
               rating: 5,
+              milestones: p.milestones || [],
             }));
             setApiProjects(mapped);
           }
@@ -63,6 +65,7 @@ const MyProjects = () => {
               budgetType: 'fixed',
               bidEndDate: p.timeline || '-',
               status: p.status === 'in-progress' ? 'In Progress' : p.status === 'open' ? 'Open' : 'Completed',
+              milestones: p.milestones || [],
             }));
             setApiProjects(mapped);
           }
@@ -103,6 +106,12 @@ const MyProjects = () => {
         budgetType: "hour",
         bidEndDate: "7 days",
         status: "Open",
+        milestones: [
+          { id: 1, title: "Project Setup & Architecture", amount: 200, status: "pending", githubLink: "" },
+          { id: 2, title: "Frontend Development", amount: 300, status: "pending", githubLink: "" },
+          { id: 3, title: "Backend API Development", amount: 350, status: "pending", githubLink: "" },
+          { id: 4, title: "Testing & Deployment", amount: 150, status: "pending", githubLink: "" },
+        ],
       },
       {
         id: 2,
@@ -115,6 +124,11 @@ const MyProjects = () => {
         budgetType: "hour",
         bidEndDate: "5 days",
         status: "Open",
+        milestones: [
+          { id: 1, title: "UI/UX Design", amount: 400, status: "pending", githubLink: "" },
+          { id: 2, title: "Product Catalog", amount: 500, status: "pending", githubLink: "" },
+          { id: 3, title: "Payment Integration", amount: 400, status: "pending", githubLink: "" },
+        ],
       },
       {
         id: 3,
@@ -127,6 +141,11 @@ const MyProjects = () => {
         budgetType: "fixed",
         bidEndDate: "3 days",
         status: "Open",
+        milestones: [
+          { id: 1, title: "Wireframes", amount: 250, status: "pending", githubLink: "" },
+          { id: 2, title: "High Fidelity Designs", amount: 350, status: "pending", githubLink: "" },
+          { id: 3, title: "Prototype", amount: 250, status: "pending", githubLink: "" },
+        ],
       },
       {
         id: 4,
@@ -139,6 +158,12 @@ const MyProjects = () => {
         budgetType: "fixed",
         bidEndDate: "6 days",
         status: "Open",
+        milestones: [
+          { id: 1, title: "Database Schema Design", amount: 5000, status: "pending", githubLink: "" },
+          { id: 2, title: "Core API Endpoints", amount: 10000, status: "pending", githubLink: "" },
+          { id: 3, title: "Authentication & Security", amount: 7500, status: "pending", githubLink: "" },
+          { id: 4, title: "Documentation & Testing", amount: 5000, status: "pending", githubLink: "" },
+        ],
       },
     ],
     inprogress: [
@@ -154,6 +179,12 @@ const MyProjects = () => {
         bidEndDate: "-",
         status: "In Progress",
         freelancer: "Rahul Sharma",
+        milestones: [
+          { id: 1, title: "Dashboard Layout", amount: 300, status: "completed", githubLink: "https://github.com/user/dashboard-layout" },
+          { id: 2, title: "Charts & Analytics", amount: 400, status: "completed", githubLink: "https://github.com/user/charts-analytics" },
+          { id: 3, title: "User Management", amount: 350, status: "pending", githubLink: "" },
+          { id: 4, title: "Settings & Profile", amount: 200, status: "pending", githubLink: "" },
+        ],
       },
       {
         id: 6,
@@ -167,6 +198,11 @@ const MyProjects = () => {
         bidEndDate: "-",
         status: "In Progress",
         freelancer: "Priya Patel",
+        milestones: [
+          { id: 1, title: "Plugin Architecture", amount: 150, status: "completed", githubLink: "https://github.com/user/plugin-arch" },
+          { id: 2, title: "Core Features", amount: 250, status: "pending", githubLink: "" },
+          { id: 3, title: "Admin Panel", amount: 200, status: "pending", githubLink: "" },
+        ],
       },
     ],
     past: [
@@ -182,6 +218,10 @@ const MyProjects = () => {
         bidEndDate: "-",
         status: "Completed",
         freelancer: "Amit Kumar",
+        milestones: [
+          { id: 1, title: "Concept Design", amount: 100, status: "completed", githubLink: "https://github.com/user/logo-concepts" },
+          { id: 2, title: "Final Design", amount: 150, status: "completed", githubLink: "https://github.com/user/logo-final" },
+        ],
       },
       {
         id: 8,
@@ -195,6 +235,11 @@ const MyProjects = () => {
         bidEndDate: "-",
         status: "Completed",
         freelancer: "Sneha Gupta",
+        milestones: [
+          { id: 1, title: "SEO Audit", amount: 150, status: "completed", githubLink: "https://github.com/user/seo-audit" },
+          { id: 2, title: "On-Page Optimization", amount: 200, status: "completed", githubLink: "https://github.com/user/on-page-seo" },
+          { id: 3, title: "Off-Page Strategy", amount: 150, status: "completed", githubLink: "https://github.com/user/off-page-seo" },
+        ],
       },
     ],
   };
@@ -212,6 +257,7 @@ const MyProjects = () => {
         budgetType: "hour",
         bidEndDate: "7 days",
         status: "Pending",
+        milestones: [],
       },
       {
         id: 2,
@@ -224,6 +270,7 @@ const MyProjects = () => {
         budgetType: "hour",
         bidEndDate: "4 days",
         status: "Pending",
+        milestones: [],
       },
       {
         id: 3,
@@ -236,6 +283,7 @@ const MyProjects = () => {
         budgetType: "fixed",
         bidEndDate: "2 days",
         status: "Shortlisted",
+        milestones: [],
       },
     ],
     current: [
@@ -251,6 +299,12 @@ const MyProjects = () => {
         deadline: "30/03/2026",
         status: "In Progress",
         progress: 65,
+        milestones: [
+          { id: 1, title: "App Setup & Navigation", amount: 300, status: "completed", githubLink: "https://github.com/user/app-setup" },
+          { id: 2, title: "Core Features", amount: 500, status: "completed", githubLink: "https://github.com/user/core-features" },
+          { id: 3, title: "API Integration", amount: 400, status: "pending", githubLink: "" },
+          { id: 4, title: "Testing & Polish", amount: 300, status: "pending", githubLink: "" },
+        ],
       },
       {
         id: 5,
@@ -264,6 +318,11 @@ const MyProjects = () => {
         deadline: "20/03/2026",
         status: "In Progress",
         progress: 40,
+        milestones: [
+          { id: 1, title: "API Research & Planning", amount: 150, status: "completed", githubLink: "https://github.com/user/api-planning" },
+          { id: 2, title: "Integration Development", amount: 350, status: "pending", githubLink: "" },
+          { id: 3, title: "Testing & Documentation", amount: 200, status: "pending", githubLink: "" },
+        ],
       },
     ],
     past: [
@@ -279,6 +338,12 @@ const MyProjects = () => {
         completedDate: "25/02/2026",
         status: "Completed",
         rating: 5,
+        milestones: [
+          { id: 1, title: "Store Setup", amount: 500, status: "completed", githubLink: "https://github.com/user/store-setup" },
+          { id: 2, title: "Product Management", amount: 600, status: "completed", githubLink: "https://github.com/user/product-mgmt" },
+          { id: 3, title: "Checkout & Payment", amount: 500, status: "completed", githubLink: "https://github.com/user/checkout" },
+          { id: 4, title: "Deployment", amount: 400, status: "completed", githubLink: "https://github.com/user/deployment" },
+        ],
       },
       {
         id: 7,
@@ -292,8 +357,22 @@ const MyProjects = () => {
         completedDate: "10/02/2026",
         status: "Completed",
         rating: 4,
+        milestones: [
+          { id: 1, title: "Dashboard Design", amount: 400, status: "completed", githubLink: "https://github.com/user/crm-design" },
+          { id: 2, title: "CRM Features", amount: 500, status: "completed", githubLink: "https://github.com/user/crm-features" },
+          { id: 3, title: "Reports & Analytics", amount: 300, status: "completed", githubLink: "https://github.com/user/crm-reports" },
+        ],
       },
     ],
+  };
+
+  // Handle project click to show milestones
+  const handleProjectClick = (project) => {
+    if (onProjectClick) {
+      onProjectClick(project, viewAs);
+    } else {
+      setSelectedProject({ ...project, viewAs });
+    }
   };
 
   // Use API projects, fall back to static demo data
@@ -515,6 +594,7 @@ const MyProjects = () => {
       backgroundColor: isHovered ? "#f8fafc" : "#fff",
       borderBottom: "1px solid #f0f0f0",
       transition: "background-color 0.15s ease",
+      cursor: "pointer",
     }),
     td: {
       padding: "16px",
@@ -549,6 +629,16 @@ const MyProjects = () => {
       borderRadius: "4px",
       fontSize: "13px",
       color: "#4a5568",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+    viewMilestonesButton: {
+      padding: "6px 16px",
+      backgroundColor: "#2563eb",
+      border: "1px solid #2563eb",
+      borderRadius: "4px",
+      fontSize: "13px",
+      color: "#fff",
       cursor: "pointer",
       transition: "all 0.2s ease",
     },
@@ -672,17 +762,17 @@ const MyProjects = () => {
             onMouseEnter={() => setHoveredRow(project.id)}
             onMouseLeave={() => setHoveredRow(null)}
           >
-            <td style={styles.td}>
+            <td style={styles.td} onClick={() => handleProjectClick(project)}>
               <div style={styles.projectName}>{project.name}</div>
               <div style={styles.projectDate}>{project.date}</div>
             </td>
             <td style={{ ...styles.td, textAlign: "center" }}>{project.totalBids}</td>
             <td style={styles.td}>
-              <span style={styles.currency}>₹{project.avgBid.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR</span>
+              <span style={styles.currency}>₹{project.avgBid?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR</span>
             </td>
             <td style={styles.td}>
               <span style={styles.currency}>
-                ₹{project.budgetMin.toLocaleString("en-IN", { minimumFractionDigits: 2 })} – {project.budgetMax.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR / {project.budgetType}
+                ₹{project.budgetMin?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} – {project.budgetMax?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR / {project.budgetType}
               </span>
             </td>
             <td style={styles.td}>
@@ -692,8 +782,10 @@ const MyProjects = () => {
               <span style={getStatusStyle(project.status)}>{project.status}</span>
             </td>
             <td style={styles.td}>
-              <div style={{ ...styles.actionsCell, position: "relative" }}>
-                <button style={styles.editButton}>Edit</button>
+              <div style={{ ...styles.actionsCell, position: "relative" }} onClick={(e) => e.stopPropagation()}>
+                <button style={styles.viewMilestonesButton} onClick={() => handleProjectClick(project)}>
+                  Milestones
+                </button>
                 <button
                   style={styles.dropdownButton}
                   onClick={() => setOpenDropdown(openDropdown === project.id ? null : project.id)}
@@ -771,11 +863,11 @@ const MyProjects = () => {
                 </td>
                 <td style={styles.td}>{project.clientName}</td>
                 <td style={styles.td}>
-                  <span style={styles.currency}>₹{project.myBid.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR</span>
+                  <span style={styles.currency}>₹{project.myBid?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR</span>
                 </td>
                 <td style={styles.td}>
                   <span style={styles.currency}>
-                    ₹{project.budgetMin.toLocaleString("en-IN", { minimumFractionDigits: 2 })} – {project.budgetMax.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR / {project.budgetType}
+                    ₹{project.budgetMin?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} – {project.budgetMax?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR / {project.budgetType}
                   </span>
                 </td>
                 <td style={styles.td}>in {project.bidEndDate}</td>
@@ -842,13 +934,13 @@ const MyProjects = () => {
                 onMouseEnter={() => setHoveredRow(project.id)}
                 onMouseLeave={() => setHoveredRow(null)}
               >
-                <td style={styles.td}>
+                <td style={styles.td} onClick={() => handleProjectClick(project)}>
                   <div style={styles.projectName}>{project.name}</div>
                   <div style={styles.projectDate}>Started: {project.date}</div>
                 </td>
                 <td style={styles.td}>{project.clientName}</td>
                 <td style={styles.td}>
-                  <span style={styles.currency}>₹{project.myBid.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR / {project.budgetType}</span>
+                  <span style={styles.currency}>₹{project.myBid?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR / {project.budgetType}</span>
                 </td>
                 <td style={styles.td}>{project.deadline}</td>
                 <td style={styles.td}>
@@ -863,8 +955,10 @@ const MyProjects = () => {
                   <span style={getStatusStyle(project.status)}>{project.status}</span>
                 </td>
                 <td style={styles.td}>
-                  <div style={{ ...styles.actionsCell, position: "relative" }}>
-                    <button style={styles.editButton}>Update</button>
+                  <div style={{ ...styles.actionsCell, position: "relative" }} onClick={(e) => e.stopPropagation()}>
+                    <button style={styles.viewMilestonesButton} onClick={() => handleProjectClick(project)}>
+                      Milestones
+                    </button>
                     <button
                       style={styles.dropdownButton}
                       onClick={() => setOpenDropdown(openDropdown === project.id ? null : project.id)}
@@ -888,13 +982,6 @@ const MyProjects = () => {
                           onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
                         >
                           Message Client
-                        </button>
-                        <button
-                          style={styles.dropdownItem}
-                          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8f9fa")}
-                          onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
-                        >
-                          Submit Work
                         </button>
                       </div>
                     )}
@@ -928,13 +1015,13 @@ const MyProjects = () => {
               onMouseEnter={() => setHoveredRow(project.id)}
               onMouseLeave={() => setHoveredRow(null)}
             >
-              <td style={styles.td}>
+              <td style={styles.td} onClick={() => handleProjectClick(project)}>
                 <div style={styles.projectName}>{project.name}</div>
                 <div style={styles.projectDate}>Started: {project.date}</div>
               </td>
               <td style={styles.td}>{project.clientName}</td>
               <td style={styles.td}>
-                <span style={styles.currency}>₹{project.myBid.toLocaleString("en-IN", { minimumFractionDigits: 2 })} INR</span>
+                <span style={styles.currency}>₹{project.myBid?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR</span>
               </td>
               <td style={styles.td}>{project.completedDate}</td>
               <td style={styles.td}>{renderStars(project.rating)}</td>
@@ -943,7 +1030,9 @@ const MyProjects = () => {
               </td>
               <td style={styles.td}>
                 <div style={styles.actionsCell}>
-                  <button style={styles.editButton}>View</button>
+                  <button style={styles.viewMilestonesButton} onClick={() => handleProjectClick(project)}>
+                    Milestones
+                  </button>
                 </div>
               </td>
             </tr>
@@ -952,6 +1041,17 @@ const MyProjects = () => {
       </table>
     );
   };
+
+  // If a project is selected, show milestones
+  if (selectedProject) {
+    return (
+      <ProjectMilestones 
+        project={selectedProject} 
+        viewAs={selectedProject.viewAs} 
+        onBack={() => setSelectedProject(null)} 
+      />
+    );
+  }
 
   return (
     <div style={styles.container} onClick={() => setOpenDropdown(null)}>
@@ -1045,7 +1145,11 @@ const MyProjects = () => {
         </div>
 
         <div style={styles.tableContainer}>
-          {displayedProjects.length > 0 ? (
+          {isLoadingProjects ? (
+            <div style={styles.emptyState}>
+              <p style={styles.emptyText}>Loading projects...</p>
+            </div>
+          ) : displayedProjects.length > 0 ? (
             viewAs === "client" ? renderClientTable() : renderFreelancerTable()
           ) : (
             <div style={styles.emptyState}>
@@ -1070,4 +1174,498 @@ const MyProjects = () => {
   );
 };
 
+// ProjectMilestones component embedded in the same file
+const ProjectMilestones = ({ project, viewAs, onBack }) => {
+  const [milestones, setMilestones] = useState(project.milestones || []);
+  const [showSubmitModal, setShowSubmitModal] = useState(null);
+  const [githubLink, setGithubLink] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitMilestone = async (milestoneId) => {
+    if (!githubLink.trim()) {
+      alert("Please enter a valid GitHub link");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    setMilestones(prev => 
+      prev.map(m => 
+        m.id === milestoneId 
+          ? { ...m, status: "completed", githubLink: githubLink.trim() }
+          : m
+      )
+    );
+
+    setShowSubmitModal(null);
+    setGithubLink("");
+    setIsSubmitting(false);
+  };
+
+  const completedCount = milestones.filter(m => m.status === "completed").length;
+  const totalCount = milestones.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  const styles = {
+    container: {
+      minHeight: "100vh",
+      backgroundColor: "#f8f9fa",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    },
+    header: {
+      backgroundColor: "#fff",
+      borderBottom: "1px solid #e0e0e0",
+      padding: "20px 40px",
+    },
+    headerContent: {
+      maxWidth: "1200px",
+      margin: "0 auto",
+    },
+    backButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      padding: "8px 16px",
+      backgroundColor: "#f8f9fa",
+      border: "1px solid #e0e0e0",
+      borderRadius: "6px",
+      fontSize: "14px",
+      color: "#4a5568",
+      cursor: "pointer",
+      marginBottom: "16px",
+      transition: "all 0.2s ease",
+    },
+    projectTitle: {
+      fontSize: "24px",
+      fontWeight: "600",
+      color: "#1a1a2e",
+      margin: "0 0 8px 0",
+    },
+    projectMeta: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      fontSize: "14px",
+      color: "#666",
+    },
+    viewBadge: {
+      padding: "4px 12px",
+      borderRadius: "4px",
+      fontSize: "12px",
+      fontWeight: "500",
+      backgroundColor: viewAs === "client" ? "#e7f1ff" : "#e6f7ee",
+      color: viewAs === "client" ? "#0056b3" : "#1e7e34",
+    },
+    mainContent: {
+      maxWidth: "1200px",
+      margin: "0 auto",
+      padding: "24px 40px",
+    },
+    progressCard: {
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      padding: "24px",
+      marginBottom: "24px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+    },
+    progressHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "16px",
+    },
+    progressTitle: {
+      fontSize: "18px",
+      fontWeight: "600",
+      color: "#1a1a2e",
+    },
+    progressStats: {
+      fontSize: "14px",
+      color: "#666",
+    },
+    progressBarContainer: {
+      width: "100%",
+      height: "12px",
+      backgroundColor: "#e0e0e0",
+      borderRadius: "6px",
+      overflow: "hidden",
+    },
+    progressBarFill: {
+      height: "100%",
+      backgroundColor: "#2563eb",
+      borderRadius: "6px",
+      transition: "width 0.5s ease",
+      width: `${progressPercent}%`,
+    },
+    milestonesGrid: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "16px",
+    },
+    milestoneCard: (status) => ({
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      padding: "24px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+      border: status === "completed" ? "2px solid #10b981" : "2px solid transparent",
+      transition: "all 0.2s ease",
+    }),
+    milestoneHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: "16px",
+    },
+    milestoneInfo: {
+      flex: 1,
+    },
+    milestoneNumber: {
+      fontSize: "12px",
+      fontWeight: "600",
+      color: "#9ca3af",
+      marginBottom: "4px",
+    },
+    milestoneTitle: {
+      fontSize: "18px",
+      fontWeight: "600",
+      color: "#1a1a2e",
+      marginBottom: "8px",
+    },
+    milestoneAmount: {
+      fontSize: "16px",
+      fontWeight: "500",
+      color: "#2563eb",
+    },
+    statusBadge: (status) => ({
+      padding: "6px 16px",
+      borderRadius: "20px",
+      fontSize: "13px",
+      fontWeight: "500",
+      backgroundColor: status === "completed" ? "#d4edda" : "#fff3cd",
+      color: status === "completed" ? "#155724" : "#856404",
+    }),
+    githubSection: {
+      marginTop: "16px",
+      padding: "16px",
+      backgroundColor: "#f8f9fa",
+      borderRadius: "8px",
+    },
+    githubLabel: {
+      fontSize: "13px",
+      fontWeight: "600",
+      color: "#4a5568",
+      marginBottom: "8px",
+    },
+    githubLink: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+      fontSize: "14px",
+      color: "#2563eb",
+      textDecoration: "none",
+      wordBreak: "break-all",
+    },
+    submitButton: {
+      padding: "10px 24px",
+      backgroundColor: "#2563eb",
+      border: "none",
+      borderRadius: "6px",
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#fff",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      marginTop: "16px",
+    },
+    submitButtonDisabled: {
+      padding: "10px 24px",
+      backgroundColor: "#9ca3af",
+      border: "none",
+      borderRadius: "6px",
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#fff",
+      cursor: "not-allowed",
+      marginTop: "16px",
+    },
+    noGithubText: {
+      fontSize: "14px",
+      color: "#9ca3af",
+      fontStyle: "italic",
+    },
+    // Modal styles
+    modalOverlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+    },
+    modalContent: {
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      padding: "32px",
+      maxWidth: "500px",
+      width: "90%",
+      boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+    },
+    modalTitle: {
+      fontSize: "20px",
+      fontWeight: "600",
+      color: "#1a1a2e",
+      marginBottom: "8px",
+    },
+    modalSubtitle: {
+      fontSize: "14px",
+      color: "#666",
+      marginBottom: "24px",
+    },
+    inputLabel: {
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#4a5568",
+      marginBottom: "8px",
+      display: "block",
+    },
+    input: {
+      width: "100%",
+      padding: "12px 16px",
+      border: "1px solid #e0e0e0",
+      borderRadius: "8px",
+      fontSize: "14px",
+      outline: "none",
+      transition: "border-color 0.2s ease",
+      boxSizing: "border-box",
+    },
+    modalButtons: {
+      display: "flex",
+      gap: "12px",
+      marginTop: "24px",
+      justifyContent: "flex-end",
+    },
+    cancelButton: {
+      padding: "10px 24px",
+      backgroundColor: "#fff",
+      border: "1px solid #e0e0e0",
+      borderRadius: "6px",
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#4a5568",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+    confirmButton: {
+      padding: "10px 24px",
+      backgroundColor: "#10b981",
+      border: "none",
+      borderRadius: "6px",
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "#fff",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    },
+    emptyMilestones: {
+      textAlign: "center",
+      padding: "60px 20px",
+      backgroundColor: "#fff",
+      borderRadius: "12px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+    },
+    emptyIcon: {
+      width: "80px",
+      height: "80px",
+      margin: "0 auto 20px",
+      backgroundColor: "#f0f4f8",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emptyTitle: {
+      fontSize: "18px",
+      fontWeight: "600",
+      color: "#1a1a2e",
+      marginBottom: "8px",
+    },
+    emptyText: {
+      fontSize: "14px",
+      color: "#9ca3af",
+    },
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <button 
+            style={styles.backButton}
+            onClick={onBack}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#e9ecef";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "#f8f9fa";
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Projects
+          </button>
+          <h1 style={styles.projectTitle}>{project.name}</h1>
+          <div style={styles.projectMeta}>
+            <span style={styles.viewBadge}>
+              {viewAs === "client" ? "Client View" : "Freelancer View"}
+            </span>
+            <span>Project ID: {project.id}</span>
+            <span>Started: {project.date}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.mainContent}>
+        {/* Progress Overview */}
+        <div style={styles.progressCard}>
+          <div style={styles.progressHeader}>
+            <h2 style={styles.progressTitle}>Project Progress</h2>
+            <span style={styles.progressStats}>
+              {completedCount} of {totalCount} milestones completed ({progressPercent}%)
+            </span>
+          </div>
+          <div style={styles.progressBarContainer}>
+            <div style={styles.progressBarFill} />
+          </div>
+        </div>
+
+        {/* Milestones List */}
+        {milestones.length > 0 ? (
+          <div style={styles.milestonesGrid}>
+            {milestones.map((milestone, index) => (
+              <div key={milestone.id} style={styles.milestoneCard(milestone.status)}>
+                <div style={styles.milestoneHeader}>
+                  <div style={styles.milestoneInfo}>
+                    <div style={styles.milestoneNumber}>MILESTONE {index + 1}</div>
+                    <h3 style={styles.milestoneTitle}>{milestone.title}</h3>
+                    <div style={styles.milestoneAmount}>
+                      ₹{milestone.amount?.toLocaleString("en-IN", { minimumFractionDigits: 2 }) || '0.00'} INR
+                    </div>
+                  </div>
+                  <span style={styles.statusBadge(milestone.status)}>
+                    {milestone.status === "completed" ? "Completed" : "Pending"}
+                  </span>
+                </div>
+
+                {/* GitHub Link Section */}
+                {milestone.status === "completed" && milestone.githubLink ? (
+                  <div style={styles.githubSection}>
+                    <div style={styles.githubLabel}>GitHub Repository</div>
+                    <a 
+                      href={milestone.githubLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={styles.githubLink}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                      {milestone.githubLink}
+                    </a>
+                  </div>
+                ) : viewAs === "client" && milestone.status === "pending" ? (
+                  <div style={styles.githubSection}>
+                    <div style={styles.githubLabel}>GitHub Repository</div>
+                    <span style={styles.noGithubText}>Awaiting submission from freelancer</span>
+                  </div>
+                ) : null}
+
+                {/* Submit Button for Freelancer */}
+                {viewAs === "freelancer" && milestone.status === "pending" && (
+                  <button 
+                    style={styles.submitButton}
+                    onClick={() => setShowSubmitModal(milestone.id)}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = "#1d4ed8";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "#2563eb";
+                    }}
+                  >
+                    Submit Milestone
+                  </button>
+                )}
+
+                {viewAs === "freelancer" && milestone.status === "completed" && (
+                  <button style={styles.submitButtonDisabled} disabled>
+                    Submitted
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={styles.emptyMilestones}>
+            <div style={styles.emptyIcon}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <h3 style={styles.emptyTitle}>No milestones yet</h3>
+            <p style={styles.emptyText}>Milestones will appear here once they are created for this project.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Submit Modal */}
+      {showSubmitModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowSubmitModal(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2 style={styles.modalTitle}>Submit Milestone</h2>
+            <p style={styles.modalSubtitle}>
+              Please provide the GitHub repository link for this milestone. This will mark the milestone as completed.
+            </p>
+            <label style={styles.inputLabel}>GitHub Repository URL</label>
+            <input
+              type="url"
+              placeholder="https://github.com/username/repository"
+              value={githubLink}
+              onChange={(e) => setGithubLink(e.target.value)}
+              style={styles.input}
+              onFocus={(e) => (e.target.style.borderColor = "#2563eb")}
+              onBlur={(e) => (e.target.style.borderColor = "#e0e0e0")}
+            />
+            <div style={styles.modalButtons}>
+              <button 
+                style={styles.cancelButton}
+                onClick={() => {
+                  setShowSubmitModal(null);
+                  setGithubLink("");
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                style={styles.confirmButton}
+                onClick={() => handleSubmitMilestone(showSubmitModal)}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit & Complete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default MyProjects;
+export { ProjectMilestones };

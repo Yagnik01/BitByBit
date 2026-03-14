@@ -32,10 +32,7 @@ const Navbar = ({ onLogout }) => {
         <div className="navbar__inner">
           <div className="navbar__start">
             <a className="navbar__logo" href="/dashboard">
-              <img
-                src="https://www.freelancer.com/assets/main/en/assets/freelancer-logo-light.svg"
-                alt="Freelancer"
-              />
+              <img src="/nexlance-logo.svg" alt="Nexlance" width="200" height="50" />
             </a>
             <nav className="navbar__menu">
               <Link to="/dashboard" className="navbar__link is-active">Dashboard</Link>

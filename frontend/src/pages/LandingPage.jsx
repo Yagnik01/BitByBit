@@ -67,9 +67,10 @@ const LandingPage = () => {
       <header className="landing-header">
         <div className="header-left">
           <a href="/" className="landing-brand">
-            <svg className="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            {/* <svg className="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+            </svg> */}
+            <img src="/nexlance-logo.svg" alt="Nexlance" width="200" height="50" />
             <span className="brand-text">freelancer</span>
           </a>
           <nav className="nav-menu">
