@@ -19,10 +19,10 @@ const HomePage = ({ onLogout }) => {
             .slice(0, 4)
             .map(p => ({
               id: p._id,
-              name: p.description ? p.description.slice(0, 60) : 'Untitled Project',
+              name: p.description ? p.description.slice(0, 80) + (p.description.length > 80 ? '...' : '') : 'Untitled Project',
               description: p.description || '',
               tech: p.domain ? [p.domain] : [],
-              budget: p.total_budget ? `$${p.total_budget}` : 'Open Budget',
+              budget: p.total_budget ? `$${p.total_budget.toLocaleString()}` : 'Open Budget',
               timeline: p.timeline || 'Flexible',
             }));
           setProjects(latest);

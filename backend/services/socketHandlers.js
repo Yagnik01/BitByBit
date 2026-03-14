@@ -152,6 +152,35 @@ const socketHandlers = (io) => {
       }
     });
 
+    // Test connection handler
+    socket.on('test_message', (data) => {
+      console.log('Test message received:', data);
+      socket.emit('test_response', { 
+        message: 'Server received your test message!',
+        original: data,
+        timestamp: new Date()
+      });
+    });
+
+    // Test echo handler
+    socket.on('test_echo', (data) => {
+      console.log('Echo test received:', data);
+      socket.emit('echo_response', { 
+        message: data.message || 'Echo received!',
+        timestamp: new Date()
+      });
+    });
+
+    // Test broadcast handler
+    socket.on('test_broadcast', (data) => {
+      console.log('Broadcast test received:', data);
+      io.emit('test_broadcast', { 
+        message: data.message || 'Broadcast to all users!',
+        from: socket.id,
+        timestamp: new Date()
+      });
+    });
+
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);
     });

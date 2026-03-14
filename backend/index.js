@@ -41,10 +41,8 @@ app.use("/api/auth", authRoutes);
 // Health check
 app.get("/api/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
 
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-  socket.on("disconnect", () => console.log("User disconnected:", socket.id));
-});
+// Initialize socket handlers
+socketHandlers(io);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

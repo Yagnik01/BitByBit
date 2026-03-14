@@ -9,6 +9,7 @@ import MyProjects from './pages/MyProjects.jsx';
 import Profile from './pages/Profile.jsx';
 import LoginPage from './pages/login.jsx';
 import SignupPage from './pages/signup.jsx';
+import SocketTest from './pages/SocketTest.jsx';
 import './App.css';
 
 const App = () => {
@@ -76,6 +77,7 @@ const App = () => {
           path="/Profile"
           element={isAuthenticated ? <Profile /> : <Navigate to="/login" replace />}
         />
+        <Route path="/socket-test" element={<SocketTest />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

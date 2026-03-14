@@ -1,10 +1,22 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = ({ onLogout }) => {
   const navigate = useNavigate();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
+  const [notifications, setNotifications] = React.useState([]);
+
+  const handleConfirmFreelancer = (notification) => {
+    console.log('Confirmed freelancer:', notification);
+    setNotifications(notifications.filter(n => n !== notification));
+  };
+
+  const handleRejectFreelancer = (notification) => {
+    console.log('Rejected freelancer:', notification);
+    setNotifications(notifications.filter(n => n !== notification));
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('authenticated');
