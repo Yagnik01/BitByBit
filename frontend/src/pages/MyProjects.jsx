@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const MyProjects = () => {
   const [viewAs, setViewAs] = useState("client");
@@ -9,6 +9,72 @@ const MyProjects = () => {
   const [viewFilter, setViewFilter] = useState("all");
   const [hoveredRow, setHoveredRow] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [apiProjects, setApiProjects] = useState([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+
+  // Fetch real projects when viewAs changes
+  useEffect(() => {
+    const fetchMyProjects = async () => {
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      if (!token || !userStr) return;
+      const user = JSON.parse(userStr);
+      setIsLoadingProjects(true);
+      try {
+        if (viewAs === 'freelancer') {
+          const res = await fetch(`/api/projects/my-projects/${user.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const mapped = data.map((p) => ({
+              id: p._id,
+              name: p.description ? p.description.slice(0, 80) : 'Untitled',
+              clientName: p.employerId || 'Client',
+              date: p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN') : '-',
+              myBid: p.total_budget || 0,
+              budgetMin: p.total_budget || 0,
+              budgetMax: p.total_budget || 0,
+              budgetType: 'fixed',
+              bidEndDate: '-',
+              status: p.status === 'in-progress' ? 'In Progress' : p.status === 'open' ? 'Open' : 'Completed',
+              progress: p.status === 'in-progress' ? 50 : 100,
+              deadline: p.timeline || '-',
+              completedDate: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('en-IN') : '-',
+              rating: 5,
+            }));
+            setApiProjects(mapped);
+          }
+        } else {
+          // Client: fetch projects posted by this employer
+          const res = await fetch(`/api/projects/employer-projects/${user.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const mapped = data.map((p) => ({
+              id: p._id,
+              name: p.description ? p.description.slice(0, 80) : 'Untitled',
+              date: p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-IN') : '-',
+              totalBids: 0,
+              avgBid: p.total_budget || 0,
+              budgetMin: p.total_budget || 0,
+              budgetMax: p.total_budget || 0,
+              budgetType: 'fixed',
+              bidEndDate: p.timeline || '-',
+              status: p.status === 'in-progress' ? 'In Progress' : p.status === 'open' ? 'Open' : 'Completed',
+            }));
+            setApiProjects(mapped);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch my projects:', err);
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    };
+    fetchMyProjects();
+  }, [viewAs]);
 
   const clientTabs = [
     { id: "open", label: "Open Projects" },
@@ -230,7 +296,25 @@ const MyProjects = () => {
     ],
   };
 
-  const currentProjects = viewAs === "client" ? clientProjects[activeTab] : freelancerProjects[activeTab];
+  // Use API projects, fall back to static demo data
+  const getStaticProjects = () => {
+    if (viewAs === "client") return clientProjects[activeTab] || [];
+    return freelancerProjects[activeTab] || [];
+  };
+  const currentProjects = apiProjects.length > 0
+    ? apiProjects.filter(p => {
+        if (viewAs === "freelancer") {
+          if (activeTab === "bids") return p.status === "Open";
+          if (activeTab === "current") return p.status === "In Progress";
+          if (activeTab === "past") return p.status === "Completed";
+        } else {
+          if (activeTab === "open") return p.status === "Open";
+          if (activeTab === "inprogress") return p.status === "In Progress";
+          if (activeTab === "past") return p.status === "Completed";
+        }
+        return true;
+      })
+    : getStaticProjects();
 
   const filteredProjects = currentProjects?.filter((project) =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())

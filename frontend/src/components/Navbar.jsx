@@ -1,33 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+
+  const handleLogout = () => {
+    localStorage.removeItem('authenticated');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    if (onLogout) onLogout();
+    navigate('/', { replace: true });
+  };
+
   return (
     <>
       <header className="navbar">
         <div className="navbar__inner">
           <div className="navbar__start">
-            <a className="navbar__logo" href="#">
+            <a className="navbar__logo" href="/dashboard">
               <img
                 src="https://www.freelancer.com/assets/main/en/assets/freelancer-logo-light.svg"
                 alt="Freelancer"
               />
             </a>
             <nav className="navbar__menu">
-              <a href="#" className="navbar__link is-active">Dashboard</a>
-              <a href="/browse" className="navbar__link">Lists</a>
-              <a href="/freelancers" className="navbar__link">FreeLancers</a>
-              <a href="/MyProjects" className="navbar__link">My Projects</a>
-              <a href="#" className="navbar__link">Feedback</a>
-              <a href="#" className="navbar__link">Project Updates</a>
+              <Link to="/dashboard" className="navbar__link is-active">Dashboard</Link>
+              <Link to="/browse" className="navbar__link">Browse Projects</Link>
+              <Link to="/freelancers" className="navbar__link">FreeLancers</Link>
+              <Link to="/MyProjects" className="navbar__link">My Projects</Link>
             </nav>
           </div>
-
-          {/* <div className="navbar__center">
-            <div className="navbar__section">
-              
-            </div>
-          </div> */}
 
           <div className="navbar__end">
             <Link to="/post-project" className="btn btn-primary" style={{ textDecoration: 'none' }}>
@@ -47,11 +51,10 @@ const Navbar = ({ onLogout }) => {
                 alt="Avatar"
               />
               <Link to="/Profile" className="username">
-    @Yug0407
-  </Link>
-              <strong>₹0.00 INR</strong>
+                @{user?.name || 'User'}
+              </Link>
             </div>
-            <button onClick={onLogout} className="btn outline" style={{ marginLeft: '0.75rem' }}>
+            <button onClick={handleLogout} className="btn outline" style={{ marginLeft: '0.75rem' }}>
               Log Out
             </button>
           </div>

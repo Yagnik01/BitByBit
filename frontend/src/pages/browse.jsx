@@ -87,93 +87,9 @@ const MenuIcon = () => (
   </svg>
 );
 
-// Project Data
-const projectsData = [
-  {
-    id: 1,
-    title: "HVAC Inspection Reporting Engine",
-    description:
-      "I own an HVAC service company and I am building a premium maintenance inspection reporting system for customers. Need a developer who can create a comprehensive mobile-friendly reporting dashboard with data visualization capabilities.",
-    tech: ["HTML", "MySQL", "Mobile App Development", "Data Visualization"],
-    budget: 250,
-    timeline: "2 Weeks",
-    posted: "2 minutes ago",
-    bids: 0,
-    clientRating: 4.8,
-    category: "Web Development",
-    isUrgent: true,
-  },
-  {
-    id: 2,
-    title: "AI Chatbot SaaS Platform",
-    description:
-      "Build an AI chatbot web application with OpenAI API integration. The platform should support multiple chatbots, conversation history, and analytics dashboard for business users.",
-    tech: ["React", "Node.js", "OpenAI", "MongoDB"],
-    budget: 800,
-    timeline: "3 Weeks",
-    posted: "10 minutes ago",
-    bids: 3,
-    clientRating: 4.9,
-    category: "AI & Machine Learning",
-    isUrgent: false,
-  },
-  {
-    id: 3,
-    title: "Modern Ecommerce Website",
-    description:
-      "Develop a modern ecommerce website with shopping cart functionality and Stripe payment integration. Should include product catalog, user accounts, and order management system.",
-    tech: ["Next.js", "MongoDB", "Stripe", "Tailwind CSS"],
-    budget: 1500,
-    timeline: "1 Month",
-    posted: "20 minutes ago",
-    bids: 7,
-    clientRating: 5.0,
-    category: "E-commerce",
-    isUrgent: false,
-  },
-  {
-    id: 4,
-    title: "Developer Portfolio Website",
-    description:
-      "Create a personal developer portfolio with smooth animations and modern design. Should showcase projects, skills, and include a contact form with email integration.",
-    tech: ["React", "Tailwind CSS", "Framer Motion"],
-    budget: 400,
-    timeline: "1 Week",
-    posted: "1 hour ago",
-    bids: 12,
-    clientRating: 4.7,
-    category: "Web Design",
-    isUrgent: false,
-  },
-  {
-    id: 5,
-    title: "Real Estate Listing Platform",
-    description:
-      "Build a comprehensive real estate listing website with property search, filtering, map integration, and agent dashboard. Should support multiple listing types and virtual tours.",
-    tech: ["Vue.js", "PostgreSQL", "Google Maps API", "AWS"],
-    budget: 2500,
-    timeline: "2 Months",
-    posted: "2 hours ago",
-    bids: 5,
-    clientRating: 4.6,
-    category: "Web Development",
-    isUrgent: true,
-  },
-  {
-    id: 6,
-    title: "Mobile Fitness Tracking App",
-    description:
-      "Create a cross-platform mobile fitness app with workout tracking, progress charts, social features, and integration with wearable devices.",
-    tech: ["React Native", "Firebase", "HealthKit", "Google Fit"],
-    budget: 1200,
-    timeline: "6 Weeks",
-    posted: "3 hours ago",
-    bids: 8,
-    clientRating: 4.5,
-    category: "Mobile Development",
-    isUrgent: false,
-  },
-];
+// Project Data (fetched from backend - static fallback)
+const staticProjectsData = [];
+
 
 const techStackOptions = [
   "React",
@@ -361,7 +277,7 @@ const Browse = () => {
 
   // State
   const [search, setSearch] = useState("");
-  const [budgetRange, setBudgetRange] = useState([0, 3000]);
+  const [budgetRange, setBudgetRange] = useState([0, 100000]);
   const [selectedTimelines, setSelectedTimelines] = useState([]);
   const [selectedTech, setSelectedTech] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -370,11 +286,38 @@ const Browse = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [projectsData, setProjectsData] = useState([]);
 
-  // Simulate loading
+  // Fetch real projects from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch('/api/projects/');
+        if (res.ok) {
+          const data = await res.json();
+          const normalized = data.map((p) => ({
+            id: p._id,
+            title: p.description ? p.description.slice(0, 60) : 'Untitled Project',
+            description: p.description || '',
+            tech: [],
+            budget: p.total_budget || 0,
+            timeline: p.timeline || '',
+            posted: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Recently',
+            bids: 0,
+            clientRating: 4.5,
+            category: p.domain || 'General',
+            isUrgent: false,
+            status: p.status,
+          }));
+          setProjectsData(normalized);
+        }
+      } catch (err) {
+        console.error('Failed to fetch projects:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProjects();
   }, []);
 
   // Filter and sort projects
@@ -430,9 +373,57 @@ const Browse = () => {
     setSelectedCategories((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
   };
 
+  const handleAcquireProject = async (projectId) => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (!token || !userStr) {
+      navigate('/login');
+      return;
+    }
+    const user = JSON.parse(userStr);
+    try {
+      const res = await fetch(`/api/projects/acquire/${projectId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ freelancerId: user.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Project acquired! Check My Projects.');
+        // Refresh projects list
+        const refreshRes = await fetch('/api/projects/');
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          const normalized = refreshData.map((p) => ({
+            id: p._id,
+            title: p.description ? p.description.slice(0, 60) : 'Untitled Project',
+            description: p.description || '',
+            tech: [],
+            budget: p.total_budget || 0,
+            timeline: p.timeline || '',
+            posted: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : 'Recently',
+            bids: 0,
+            clientRating: 4.5,
+            category: p.domain || 'General',
+            isUrgent: false,
+            status: p.status,
+          }));
+          setProjectsData(normalized);
+        }
+      } else {
+        alert(data.message || 'Failed to acquire project.');
+      }
+    } catch (err) {
+      alert('Server error.');
+    }
+  };
+
   const clearAllFilters = () => {
     setSearch("");
-    setBudgetRange([0, 3000]);
+    setBudgetRange([0, 100000]);
     setSelectedTimelines([]);
     setSelectedTech([]);
     setSelectedCategories([]);
@@ -484,7 +475,7 @@ const Browse = () => {
         <input
           type="range"
           min="0"
-          max="3000"
+          max="100000"
           step="100"
           value={budgetRange[1]}
           onChange={(e) => setBudgetRange([budgetRange[0], Number(e.target.value)])}
@@ -807,7 +798,7 @@ const Browse = () => {
               <article
                 key={project.id}
                 className={`project-card ${hoveredCard === project.id ? "hovered" : ""}`}
-                onClick={() => navigate(`/project/${project.id}`)}
+                onClick={() => handleAcquireProject(project.id)}
                 onMouseEnter={() => setHoveredCard(project.id)}
                 onMouseLeave={() => setHoveredCard(null)}
               >

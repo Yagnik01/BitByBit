@@ -12,22 +12,28 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError('');
 
-    if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    if (password.trim().length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
+    if (!email.trim() || !email.includes('@')) { setError('Please enter a valid email address.'); return; }
+    if (password.trim().length < 6) { setError('Password must be at least 6 characters.'); return; }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.message || 'Login failed.'); setIsLoading(false); return; }
 
+      localStorage.setItem('authenticated', 'true');
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      if (onLogin) onLogin();
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError('Server error. Please try again.');
+    }
     setIsLoading(false);
-    if (onLogin) onLogin();
-    navigate('/dashboard', { replace: true });
   };
 
   return (
@@ -35,49 +41,22 @@ const LoginPage = ({ onLogin }) => {
       <section className="hero-section" style={{ minHeight: '100vh', justifyContent: 'center' }}>
         <div className="hero-overlay" />
         <div className="auth-modal" style={{ position: 'relative', zIndex: 2 }}>
-          <div className="auth-header">
-            <h3>Welcome Back</h3>
-          </div>
+          <div className="auth-header"><h3>Welcome Back</h3></div>
           <p className="auth-subtitle">Sign in to access your dashboard</p>
-
           <form className="auth-form" onSubmit={handleSubmit}>
-            <label>
-              Email
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
+            <label>Email
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
             </label>
-            <label>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-              />
+            <label>Password
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
             </label>
-
             {error && <div className="auth-error">{error}</div>}
-
-            <button
-              type="submit"
-              className={`btn-submit ${isLoading ? 'loading' : ''}`}
-              disabled={isLoading}
-            >
+            <button type="submit" className={`btn-submit ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
               {isLoading ? '' : 'Sign In'}
             </button>
           </form>
-
           <div className="auth-switch">
-            <p>
-              Don't have an account? <Link to="/signup">Sign up</Link>
-            </p>
+            <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
           </div>
         </div>
       </section>

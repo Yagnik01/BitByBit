@@ -1,162 +1,95 @@
 const Project = require("../models/Project");
 const { analyzeProject } = require("../services/aiService");
 
-
 /* AI ANALYSIS */
-
 exports.analyzeProjectWithAI = async (req, res) => {
+  try {
+    const { description, budget, timeline } = req.body;
+    if (!description) return res.status(400).json({ message: "Description is required" });
 
-
-  try{
-
-    const {description,budget,timeline} = req.body;
-
-    const aiData = await analyzeProject(
-      description,
-      budget,
-      timeline
-    );
-
+    const aiData = await analyzeProject(description, budget, timeline);
     res.json(aiData);
-
-  }catch(error){
-
-    console.log(error);
-
-    res.status(500).json({
-      message:"AI generation failed"
-    });
-
+  } catch (error) {
+    console.error("AI analyze error:", error);
+    res.status(500).json({ message: "AI generation failed" });
   }
 };
-
-
 
 /* CREATE PROJECT */
+exports.createProject = async (req, res) => {
+  try {
+    const { description, domain, total_budget, timeline, milestones } = req.body;
 
-exports.createProject = async (req,res)=>{
-
-  try{
-
-    const {
-      description,
-      domain,
-      total_budget,
-      timeline,
-      milestones
-    } = req.body;
+    if (!description) return res.status(400).json({ message: "Description is required" });
 
     const project = new Project({
-
       description,
       domain,
-      total_budget,
+      total_budget: Number(total_budget) || 0,
       timeline,
-
-      milestones,
-
-      employerId:req.user.id,
-
-      status:"open"
-
-    });
-
-    await project.save();
-
-    res.json(project);
-
-  }catch(error){
-
-    res.status(500).json(error);
-
-  }
-
-};
-
-
-
-/* GET ALL PROJECTS */
-
-exports.getAllProjects = async (req, res) => {
-
-  try {
-
-    const projects = await Project.find({
+      milestones: milestones || [],
+      employerId: req.user.id,
       status: "open",
     });
 
-    res.json(projects);
-
+    await project.save();
+    res.status(201).json(project);
   } catch (error) {
-
-    res.status(500).json(error);
-
+    console.error("Create project error:", error);
+    res.status(500).json({ message: "Failed to create project" });
   }
-
 };
 
-
+/* GET ALL OPEN PROJECTS */
+exports.getAllProjects = async (req, res) => {
+  try {
+    const projects = await Project.find({ status: "open" }).sort({ createdAt: -1 });
+    res.json(projects);
+  } catch (error) {
+    console.error("Get projects error:", error);
+    res.status(500).json({ message: "Failed to fetch projects" });
+  }
+};
 
 /* FREELANCER ACQUIRE PROJECT */
-
 exports.acquireProject = async (req, res) => {
-
   try {
-
-    const { freelancerId } = req.body;
-
     const project = await Project.findById(req.params.id);
-
-    if (!project) {
-
-      return res.status(404).json({
-
-        message: "Project not found",
-      });
-
+    if (!project) return res.status(404).json({ message: "Project not found" });
+    if (project.freelancerId) return res.status(400).json({ message: "Project already taken" });
+    if (String(project.employerId) === String(req.user.id)) {
+      return res.status(400).json({ message: "You cannot acquire your own project" });
     }
 
-    if (project.freelancerId) {
-
-      return res.status(400).json({
-        message: "Project already taken",
-      });
-
-    }
-
-    project.freelancerId = freelancerId;
+    project.freelancerId = req.user.id;
     project.status = "in-progress";
-
     await project.save();
 
     res.json(project);
-
   } catch (error) {
-
-    res.status(500).json(error);
-
+    console.error("Acquire project error:", error);
+    res.status(500).json({ message: "Failed to acquire project" });
   }
-
 };
 
-
-
-/* FREELANCER PROJECTS */
-
+/* GET FREELANCER'S PROJECTS */
 exports.getFreelancerProjects = async (req, res) => {
-
   try {
-
-    const projects = await Project.find({
-      freelancerId: req.params.userId,
-    });
-
+    const projects = await Project.find({ freelancerId: req.params.userId }).sort({ createdAt: -1 });
     res.json(projects);
-
   } catch (error) {
-
-    res.status(500).json(error);
-
+    console.error("Get freelancer projects error:", error);
+    res.status(500).json({ message: "Failed to fetch freelancer projects" });
   }
+};
 
+/* GET EMPLOYER'S PROJECTS */
+exports.getEmployerProjects = async (req, res) => {
+  try {
+    const projects = await Project.find({ employerId: req.params.userId }).sort({ createdAt: -1 });
+    res.json(projects);
+  } catch (error) {
+    console.error("Get employer projects error:", error);
+    res.status(500).json({ message: "Failed to fetch employer projects" });
+  }
 };
