@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const connectDB = require("./config/db.js");
+const socketHandlers = require("./services/socketHandlers");
 
 dotenv.config();
 

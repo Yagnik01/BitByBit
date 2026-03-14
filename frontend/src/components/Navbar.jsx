@@ -37,10 +37,11 @@ const Navbar = ({ onLogout }) => {
             <Link to="/post-project" className="btn btn-primary" style={{ textDecoration: 'none' }}>
               Post a Project
             </Link>
-            <div className="icon-btn" title="Notifications">
-              🔔
-              <span className="badge">2</span>
-            </div>
+            <NotificationDropdown 
+              notifications={notifications}
+              onConfirmFreelancer={handleConfirmFreelancer}
+              onRejectFreelancer={handleRejectFreelancer}
+            />
             <div className="icon-btn" title="Messages">
               💬
               <span className="badge">1</span>
